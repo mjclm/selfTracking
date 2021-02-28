@@ -5,6 +5,7 @@ from django.views import generic
 from django.utils import timezone
 
 from .models import Choice, Question
+from .forms import ContactForm, TaskForm
 
 
 # Create your views here.
@@ -54,4 +55,36 @@ def vote(request, question_id):
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
-        return HttpResponse(reverse('polls:results', args=(question.id,)))
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+class AboutView(generic.TemplateView):
+    template_name = "polls/about.html"
+
+
+class ContactView(generic.edit.FormView):
+    template_name = 'polls/contact.html'
+    form_class = ContactForm
+    success_url = ''
+
+    def form_valid(self, form):
+        form.send_email()
+        return super().form_valid()
+
+
+class GiveMeYourTask(generic.edit.FormView):
+    template_name = 'polls/task_input.html'
+    form_class = TaskForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            # <process form cleaned data>
+            form.save()
+            return HttpResponseRedirect("")
+
+        return render(request, self.template_name, {'form': form})

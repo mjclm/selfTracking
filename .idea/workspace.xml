@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="61f54bb5-2a4c-445a-8f50-589a56122ddf" name="Default Changelist" comment="start self tracking project" />
+    <list default="true" id="61f54bb5-2a4c-445a-8f50-589a56122ddf" name="Default Changelist" comment="start self tracking project">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskTracking/polls/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskTracking/polls/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskTracking/polls/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskTracking/polls/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskTracking/polls/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskTracking/polls/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/taskTracking/polls/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/taskTracking/polls/views.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,7 +28,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1oFUpeXPpA9fbTiMW8gMKFS3CAj" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -70,6 +78,9 @@
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.css" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <ignored-roots>

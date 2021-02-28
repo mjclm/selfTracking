@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Choice, Question
+from .models import Choice, Question, Task, BoardTask
 
 
 class ChoiceInLine(admin.TabularInline):
@@ -22,3 +22,5 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Question, QuestionAdmin)
+admin.site.register(Task)
+admin.site.register(BoardTask)
