@@ -1,0 +1,40 @@
+{% extends 'polls/base_generic.html' %}
+
+{% block content %}
+    <div class="column">
+        <h2>Time Table</h2>
+        {% regroup object_list|dictsort:"task_start_date" by task_start_date|date:"Y-m-d" as task_by_date %}
+
+        {% if task_by_date %}
+
+        <table>
+
+            {% for tasks in task_by_date %}
+                <tr>
+                    <td>
+                        <div class="card">
+                            <p style="text-align:center;">
+                                {{ tasks.grouper }}
+                            </p>
+                        </div>
+                    </td>
+                    {% for boardtask in tasks.list %}
+                    <td>
+                        <div class="card timetable-element"
+                             onclick="location.href='./{{boardtask.pk}}/';">
+                            <h3>{{ boardtask.task }}:</h3>
+                            <p><b>Date:</b> {{ boardtask.task_start_time }}</p>
+                            <p><b>Rating:</b> {{ boardtask.task_rating }}</p>
+                            <p><b>Done:</b> {{ boardtask.task_done }}</p>
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+
+        </table>
+        {% else %}
+            <p>No polls are available.</p>
+        {% endif %}
+    </div>
+{% endblock %}
