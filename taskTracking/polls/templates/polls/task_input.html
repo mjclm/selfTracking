@@ -1,14 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Enter Your task!</title>
-</head>
-<body>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Submit">
-    </form>
-</body>
-</html>
+{% extends 'polls/base_generic.html' %}
+{% load static %}
+
+{% block content %}
+    <div>
+        <!--One div to enter your new tasks-->
+        <div class="column">
+             <h2> Enter your task</h2>
+             <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+{% endblock %}
+

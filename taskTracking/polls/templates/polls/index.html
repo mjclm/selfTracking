@@ -1,13 +1,15 @@
-{% load static %}
+{% extends 'polls/base_generic.html' %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
-
-{% if latest_question_list %}
-    <ul>
-    {% for question in latest_question_list %}
-        <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No polls are available.</p>
-{% endif %}
+{% block content %}
+    <div class="post">
+        <p>This App is really cool! It allows to register your
+            tasks and to display it, no need to memorize!</p>
+        <p>Also, it can display your routine. The percentage of
+            time distributed between your tasks, according to the
+            range you select! The app is interactive, you can modify
+            the task of the days wanted from the timetable menu!
+        </p>
+        <p>Thanks for using it! And we wish you a great exp!!</p>
+        <p>The Self Tracking Team</p>
+    </div>
+{% endblock %}

@@ -1,90 +1,89 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from django.utils.translation import ugettext as _
 
-from .models import Choice, Question
-from .forms import ContactForm, TaskForm
+from .models import BoardTask, Task
+from .forms import TaskForm
+
+from .utils import date_from_str_to_datetime
 
 
 # Create your views here.
-class IndexView(generic.ListView):
+class IndexView(generic.TemplateView):
     template_name = 'polls/index.html'
-    context_object_name = 'latest_question_list'
-
-    def get_queryset(self):
-        """
-        Return the last five published questions (not including those set to be
-        published in the future).
-        """
-        return Question.objects.filter(
-            pub_date__lte=timezone.now()
-        ).order_by('-pub_date')[:5]
-
-
-class DetailView(generic.DetailView):
-    model = Question
-    template_name = 'polls/detail.html'
-
-    def get_queryset(self):
-        """
-        Excludes any questions that aren't published yet.
-        """
-        return Question.objects.filter(pub_date__lte=timezone.now())
-
-
-class ResultsView(generic.DetailView):
-    model = Question
-    template_name = 'polls/results.html'
-
-
-def vote(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    try:
-        selected_choice = question.choice_set.get(pk=request.POST['choice'])
-    except (KeyError, Choice.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(request, 'polls/detail.html', {
-            'question': question,
-            'error_message': "You didn't select a choice.",
-        })
-    else:
-        selected_choice.votes += 1
-        selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
-        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 
 class AboutView(generic.TemplateView):
     template_name = "polls/about.html"
+    context_object_name = 'latest_tasks_list'
 
 
-class ContactView(generic.edit.FormView):
-    template_name = 'polls/contact.html'
-    form_class = ContactForm
-    success_url = ''
-
-    def form_valid(self, form):
-        form.send_email()
-        return super().form_valid()
-
-
-class GiveMeYourTask(generic.edit.FormView):
-    template_name = 'polls/task_input.html'
-    form_class = TaskForm
+class TimeTableView(generic.TemplateView):
+    template_name = 'polls/timetable.html'
 
     def get(self, request, *args, **kwargs):
-        form = self.form_class()
-        return render(request, self.template_name, {'form': form})
+        now = timezone.now()
+        date_range = (date_from_str_to_datetime(request.GET.get("visual_start_date", now.strftime("%Y-%m-%d"))),
+                      date_from_str_to_datetime(request.GET.get("visual_end_date", (now + timezone.timedelta(days=7)).strftime("%Y-%m-%d"))))
+
+        self.object_list = self.get_queryset(date_range)
+
+        context = self.get_context_data(object_list=self.object_list)
+
+        return self.render_to_response(context)
+
+    def get_queryset(self, date_range):
+        start_date, end_date = date_range
+        return BoardTask.objects.filter(task_start_date__range=(start_date, end_date)).order_by("task_start_time")
+
+
+class TaskView(generic.edit.FormView):
+    template_name = 'polls/task_input.html'
+    form_class = TaskForm
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
             # <process form cleaned data>
             form.save()
-            return HttpResponseRedirect("")
+            return HttpResponseRedirect(reverse('polls:timetable'))
 
         return render(request, self.template_name, {'form': form})
+
+
+class TaskModifyView(generic.edit.FormView):
+    template_name = 'polls/task_input.html'
+    form_class = TaskForm
+
+    def post(self, request, *args, **kwargs):
+        instance = BoardTask.objects.get(pk=self.kwargs['pk'])
+        form = self.form_class(request.POST, instance=instance)
+        if form.is_valid():
+            # <process form cleaned data>
+            form.save()
+            return HttpResponseRedirect(reverse('polls:timetable'))
+
+        return render(request, self.template_name, {'form': form})
+
+    def get_initial(self, *args, **kwargs):
+        """
+        Returns the initial data to use for forms on this view
+        """
+        initial = super().get_initial()
+        some_object = BoardTask.objects.filter(pk=self.kwargs['pk']).values()[0]
+        print(some_object)
+        initial.update(some_object)
+        initial.update({'task': Task.objects.get(pk=some_object.get('task_id'))})
+        return initial
+
+
+class VisualizationView(generic.ListView):
+    template_name = "polls/viz_task.html"
+
+    def get_queryset(self):
+        return BoardTask.objects.filter().order_by("task_start_time")
+
+
