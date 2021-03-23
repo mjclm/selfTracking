@@ -1,6 +1,40 @@
 {% extends 'polls/base_generic.html' %}
 
 {% block content %}
-    {% for tasks
 
+    <link href="https://cdn.bokeh.org/bokeh/release/bokeh-2.3.0.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.0.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.0.min.css" rel="stylesheet" type="text/css">
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.3.0.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.0.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.0.min.js"></script>
+
+    <div> {{ div | safe }}</div>
+    <div>
+    {% if tasks_list %}
+    <table style="width:100%">
+        <thead>
+        </thead>
+        <tbody>
+            {% for task in tasks_list %}
+            <tr>
+                <td>{{task.id}}</td>
+                <td>{{task.task_start_date}}</td>
+                <td>{{task.task_end_date}}</td>
+                <td>{{task.task_start_time}}</td>
+                <td>{{task.task_end_time}}</td>
+                <td>{{task.task_comment}}</td>
+                <td>{{task.task_rating}}</td>
+                <td>{{task.task_done}}</td>
+                <td>{{task.task_id}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+    </div>
+        <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-2.3.0.min.js"></script>
+        {{ script | safe }}
 {% endblock %}

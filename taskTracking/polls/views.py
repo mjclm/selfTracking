@@ -5,6 +5,10 @@ from django.views import generic
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
+# Bokeh
+from bokeh.plotting import figure, output_file, show
+from bokeh.embed import components
+
 from .models import BoardTask, Task
 from .forms import TaskForm
 
@@ -74,7 +78,6 @@ class TaskModifyView(generic.edit.FormView):
         """
         initial = super().get_initial()
         some_object = BoardTask.objects.filter(pk=self.kwargs['pk']).values()[0]
-        print(some_object)
         initial.update(some_object)
         initial.update({'task': Task.objects.get(pk=some_object.get('task_id'))})
         return initial
@@ -82,8 +85,35 @@ class TaskModifyView(generic.edit.FormView):
 
 class VisualizationView(generic.ListView):
     template_name = "polls/viz_task.html"
+    context_object_name = 'tasks_list'
 
     def get_queryset(self):
-        return BoardTask.objects.filter().order_by("task_start_time")
+        return BoardTask.objects.all()
+
+    def get(self, request, *args, **kwargs):
+
+        x = [1, 3, 5, 7, 9, 11, 13]
+        y = [1, 2, 3, 4, 5, 6, 7]
+        title = 'y = f(x)'
+
+        plot = figure(title=title,
+                      x_axis_label='X-Axis',
+                      y_axis_label='Y-Axis',
+                      plot_width=400,
+                      plot_height=400)
+
+        plot.line(x, y, line_width=2)
+
+        # Store components
+        script, div = components(plot)
+
+        self.object_list = self.get_queryset()
+
+        context = self.get_context_data(object_list=self.object_list, script=script, div=div)
+
+        return self.render_to_response(context)
+
+
+
 
 
