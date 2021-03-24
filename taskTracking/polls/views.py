@@ -5,9 +5,12 @@ from django.views import generic
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
+from django.db.models import Count, Avg
+
 # Bokeh
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
+from bokeh.models import ColumnDataSource
 
 from .models import BoardTask, Task
 from .forms import TaskForm
@@ -92,20 +95,26 @@ class VisualizationView(generic.ListView):
 
     def get(self, request, *args, **kwargs):
 
-        x = [1, 3, 5, 7, 9, 11, 13]
-        y = [1, 2, 3, 4, 5, 6, 7]
-        title = 'y = f(x)'
+        # Data extract and transform
+        tasks_set = BoardTask.objects.values("task_id__task_name")\
+            .annotate(d_count=Count('task_id'), avg_rating=Avg('task_rating'))
 
-        plot = figure(title=title,
-                      x_axis_label='X-Axis',
-                      y_axis_label='Y-Axis',
-                      plot_width=400,
-                      plot_height=400)
+        # inverse LD to DL
+        v = {k: [dic[k] for dic in tasks_set] for k in tasks_set[0]}
 
-        plot.line(x, y, line_width=2)
+        source = ColumnDataSource(data=v)
+
+        print(v)
+
+        p = figure(x_range=v['task_id__task_name'], plot_height=500, toolbar_location=None, title="Tasks Counts")
+
+        p.vbar(x='task_id__task_name', top='d_count', width=0.9,
+               source=source, line_color='white', color="#e84d60")
+
+        p.xaxis.major_label_orientation = 1
 
         # Store components
-        script, div = components(plot)
+        script, div = components(p)
 
         self.object_list = self.get_queryset()
 
