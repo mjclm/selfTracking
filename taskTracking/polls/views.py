@@ -5,17 +5,21 @@ from django.views import generic
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
-from django.db.models import Count, Avg
+from django.db.models import F, ExpressionWrapper, fields
+from django.db.models import Count, Sum, Avg
 
 # Bokeh
-from bokeh.plotting import figure, output_file, show
+from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource
+from bokeh.layouts import row
+from .bokehApps.bokeh_plot import bar_plot
+
 
 from .models import BoardTask, Task
 from .forms import TaskForm
 
-from .utils import date_from_str_to_datetime
+from .utils import date_from_str_to_datetime, timedelta_to_seconds
 
 
 # Create your views here.
@@ -95,26 +99,51 @@ class VisualizationView(generic.ListView):
 
     def get(self, request, *args, **kwargs):
 
-        # Data extract and transform
+        # graph 1
         tasks_set = BoardTask.objects.values("task_id__task_name")\
             .annotate(d_count=Count('task_id'), avg_rating=Avg('task_rating'))
-
-        # inverse LD to DL
         v = {k: [dic[k] for dic in tasks_set] for k in tasks_set[0]}
+        source1 = ColumnDataSource(data=v)
 
-        source = ColumnDataSource(data=v)
+        p1 = figure(title="Simple line example",
+                    x_axis_label='x',
+                    y_axis_label='y', x_range=v['task_id__task_name'])
+
+        p1.vbar(x='task_id__task_name', top='avg_rating', width=.9,
+                line_color='white',
+                color="#e84d60",
+                legend_label="tasks", source=source1)
+
+        p1.xaxis.major_label_orientation = 1
+
+        # graph 2
+        duration = ExpressionWrapper(
+            (F("task_end_time") - F("task_start_time")) + (F("task_end_date") - F("task_start_date")),
+            output_field=fields.DurationField())
+
+        data = BoardTask.objects.annotate(duration=duration) \
+            .annotate(duration=timedelta_to_seconds(F("duration"))) \
+            .values("task_id__task_name") \
+            .annotate(sum_duration=Sum('duration')) \
+
+        v = {k: [dic[k] for dic in data] for k in data[0]}
+        source2 = ColumnDataSource(data=v)
 
         print(v)
 
-        p = figure(x_range=v['task_id__task_name'], plot_height=500, toolbar_location=None, title="Tasks Counts")
+        p2 = figure(title="Simple line example",
+                    x_axis_label='x',
+                    y_axis_label='y', x_range=v['task_id__task_name'])
 
-        p.vbar(x='task_id__task_name', top='d_count', width=0.9,
-               source=source, line_color='white', color="#e84d60")
+        p2.vbar(x='task_id__task_name', top='sum_duration', width=.9,
+                line_color='white',
+                color="#e84d60",
+                legend_label="tasks", source=source2)
 
-        p.xaxis.major_label_orientation = 1
+        p2.xaxis.major_label_orientation = 1
 
         # Store components
-        script, div = components(p)
+        script, div = components(row(p1, p2))
 
         self.object_list = self.get_queryset()
 
