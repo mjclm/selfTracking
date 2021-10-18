@@ -105,9 +105,9 @@ class VisualizationView(generic.ListView):
         v = {k: [dic[k] for dic in tasks_set] for k in tasks_set[0]}
         source1 = ColumnDataSource(data=v)
 
-        p1 = figure(title="Simple line example",
-                    x_axis_label='x',
-                    y_axis_label='y', x_range=v['task_id__task_name'])
+        p1 = figure(title="Average rating by task",
+                    x_axis_label='task',
+                    y_axis_label='Rating (1-10)', x_range=v['task_id__task_name'])
 
         p1.vbar(x='task_id__task_name', top='avg_rating', width=.9,
                 line_color='white',
@@ -122,18 +122,19 @@ class VisualizationView(generic.ListView):
             output_field=fields.DurationField())
 
         data = BoardTask.objects.annotate(duration=duration) \
-            .annotate(duration=timedelta_to_seconds(F("duration"))) \
             .values("task_id__task_name") \
             .annotate(sum_duration=Sum('duration')) \
 
         v = {k: [dic[k] for dic in data] for k in data[0]}
+
+        # convert seconds to other unite
+        v['sum_duration'] = [value.seconds / 60 for value in v['sum_duration']]
+
         source2 = ColumnDataSource(data=v)
 
-        print(v)
-
-        p2 = figure(title="Simple line example",
-                    x_axis_label='x',
-                    y_axis_label='y', x_range=v['task_id__task_name'])
+        p2 = figure(title="Total time by task",
+                    x_axis_label='task',
+                    y_axis_label='Time (minutes)', x_range=v['task_id__task_name'])
 
         p2.vbar(x='task_id__task_name', top='sum_duration', width=.9,
                 line_color='white',
